@@ -1,27 +1,27 @@
 #!/bin/bash
+# scripts/install_dependencies_simple.sh
 set -e
 
-echo "🚀 Installing dependencies for Qwen2.5-VL-32B..."
+echo "🚀 Installing dependencies (without flash-attn)..."
 
 # Update system
 apt update && apt upgrade -y
-
-# Install system dependencies
-apt install -y git wget curl htop nvtop supervisor nginx
+apt install -y git wget curl htop nvtop
 
 # Install Python packages
 pip install --upgrade pip
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# Install other requirements
-pip install -r requirements.txt
+# Install PyTorch
+pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121
 
-# Install flash-attention (can be tricky)
-pip install flash-attn --no-build-isolation || echo "⚠️  Flash attention failed, continuing without it"
+# Install other requirements (no flash-attn)
+pip install transformers==4.36.0
+pip install accelerate bitsandbytes optimum
+pip install qwen-vl-utils pillow requests
+pip install fastapi uvicorn python-multipart pydantic
 
-# Create log directories
+# Try xformers for better performance
+pip install xformers==0.0.23 || echo "⚠️  xformers failed, using standard attention"
+
 mkdir -p logs
-mkdir -p /var/log/qwen-server
-
-echo "✅ Dependencies installed successfully!"
-echo "💡 Run './scripts/start_server.sh' to start the server"
+echo "✅ Dependencies installed successfully (standard attention)!"
